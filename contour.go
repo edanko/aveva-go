@@ -24,6 +24,32 @@ type Segment struct {
 	BevelData *BevelData
 }
 
+func (c *Contour) invert() {
+	if c == nil {
+		return
+	}
+
+	for _, s := range c.Segments {
+		s.Sweep = -s.Sweep
+		s.Origin.X = -s.Origin.X
+		s.Start.X = -s.Start.X
+		s.End.X = -s.End.X
+
+		if s.BevelData != nil && s.BevelData.BevelCode != 0 {
+			b := s.BevelData
+
+			b.BevelCode = -b.BevelCode
+			b.AngleTS, b.AngleOS = b.AngleOS, b.AngleTS
+			b.Angle2TS, b.Angle2OS = b.Angle2OS, b.Angle2TS
+			b.DepthTS, b.DepthOS = b.DepthOS, b.DepthTS
+			b.ChamferWidthTS, b.ChamferWidthOS = b.ChamferWidthOS, b.ChamferWidthTS
+			b.Angle2Wts, b.Angle2Wos = b.Angle2Wos, b.Angle2Wts
+			b.ChamferHeightTS, b.ChamferHeightOS = b.ChamferHeightOS, b.ChamferHeightTS
+			s.BevelData = b
+		}
+	}
+}
+
 func readContour(s *bufio.Scanner) *Contour {
 	con := new(Contour)
 
