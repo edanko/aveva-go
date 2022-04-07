@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Holes struct {
+type Hole struct {
 	Open              int
 	DistOrigin        float64
 	DistOriginToZeroP float64
@@ -19,8 +19,8 @@ type Holes struct {
 	Contour           *Contour
 }
 
-func readHolesNotchesCutouts(s *bufio.Scanner) *Holes {
-	h := new(Holes)
+func readHolesNotchesCutouts(s *bufio.Scanner) *Hole {
+	h := new(Hole)
 
 next:
 	for s.Scan() {
