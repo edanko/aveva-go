@@ -109,12 +109,12 @@ type End struct {
 	Fla2Seg                float64
 	Gsd                    float64
 	GsdDist                float64
-	Contour                *Contour
-	FContour               *Contour
+	Contour                Contour
+	FContour               Contour
 }
 
-func readEnd(s *bufio.Scanner) *End {
-	e := new(End)
+func readEnd(s *bufio.Scanner) End {
+	var e End
 
 	bevelNamesFound := 0
 

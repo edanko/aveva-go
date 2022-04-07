@@ -10,8 +10,8 @@ type ExcessData struct {
 	ExcessValue float64
 }
 
-func readExcessData(s *bufio.Scanner) *ExcessData {
-	e := new(ExcessData)
+func readExcessData(s *bufio.Scanner) ExcessData {
+	var e ExcessData
 
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")

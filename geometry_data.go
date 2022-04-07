@@ -9,11 +9,11 @@ import (
 type GeometryData struct {
 	Type       string
 	RollAxisNo int
-	Contour    *Contour
+	Contour    Contour
 }
 
-func readGeometryData(s *bufio.Scanner) *GeometryData {
-	gd := new(GeometryData)
+func readGeometryData(s *bufio.Scanner) GeometryData {
+	var gd GeometryData
 
 next:
 	for s.Scan() {

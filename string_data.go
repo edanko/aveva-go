@@ -8,15 +8,15 @@ import (
 
 type StringData struct {
 	Type   string
-	Pos    *Point
+	Pos    Point
 	Angle  float64
 	Height float64
 	String string
 }
 
-func readStringData(s *bufio.Scanner) *StringData {
-	sd := new(StringData)
-	pos := new(Point)
+func readStringData(s *bufio.Scanner) StringData {
+	var sd StringData
+	var pos Point
 
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")

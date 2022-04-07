@@ -16,11 +16,11 @@ type Hole struct {
 	Mirror            int
 	Name              string
 	DistLeft          float64
-	Contour           *Contour
+	Contour           Contour
 }
 
-func readHolesNotchesCutouts(s *bufio.Scanner) *Hole {
-	h := new(Hole)
+func readHolesNotchesCutouts(s *bufio.Scanner) Hole {
+	var h Hole
 
 next:
 	for s.Scan() {

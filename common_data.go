@@ -11,8 +11,8 @@ type CommonData struct {
 	Quality   string
 }
 
-func readCommonData(s *bufio.Scanner) *CommonData {
-	cd := new(CommonData)
+func readCommonData(s *bufio.Scanner) CommonData {
+	var cd CommonData
 
 next:
 	for s.Scan() {
