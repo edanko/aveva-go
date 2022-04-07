@@ -64,7 +64,7 @@ type ProfileData struct {
 	BendDirection    string
 	LeftEnd          *End
 	RightEnd         *End
-	Holes            []*Holes
+	Holes            []*Hole
 	Quantity         int
 }
 
