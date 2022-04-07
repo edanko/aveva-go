@@ -21,24 +21,23 @@ type PartData struct {
 	ExtensionU         float64
 	ExtensionV         float64
 	PlateSide          string
-	PartCog            *Point
+	PartCog            Point
 	NoIntervalsExcess1 int
 	LengthExcess1      float64
 	NoIntervalsExcess2 int
 	LengthExcess2      float64
 	NoIntervalsExcess3 int
 	LengthExcess3      float64
-	StringData         []*StringData
-	BurningData        []*BurningData
-	MarkingData        []*MarkingData
-	GeometryData       []*GeometryData
+	StringData         []StringData
+	BurningData        []BurningData
+	MarkingData        []MarkingData
+	GeometryData       []GeometryData
 	Quantity           int
 }
 
-func readPartData(s *bufio.Scanner) *PartData {
-	p := new(PartData)
-
-	partCog := new(Point)
+func readPartData(s *bufio.Scanner) PartData {
+	var p PartData
+	var partCog Point
 
 next:
 	for s.Scan() {
@@ -116,9 +115,9 @@ func (p *PartData) Mirror() {
 	}
 
 	for _, b := range p.BurningData {
-		invertContour(b.Contour)
+		b.Contour.invert()
 		if b.GeometryData != nil {
-			invertContour(b.GeometryData.Contour)
+			b.GeometryData.Contour.invert()
 		}
 	}
 
@@ -128,36 +127,10 @@ func (p *PartData) Mirror() {
 		} else {
 			m.MarkingSide = "TS"
 		}
-		invertContour(m.Contour)
+		m.Contour.invert()
 	}
 
 	for _, g := range p.GeometryData {
-		invertContour(g.Contour)
-	}
-}
-
-func invertContour(c *Contour) {
-	if c == nil {
-		return
-	}
-
-	for _, s := range c.Segments {
-		s.Sweep = -s.Sweep
-		s.Origin.X = -s.Origin.X
-		s.Start.X = -s.Start.X
-		s.End.X = -s.End.X
-
-		if s.BevelData != nil && s.BevelData.BevelCode != 0 {
-			b := s.BevelData
-
-			b.BevelCode = -b.BevelCode
-			b.AngleTS, b.AngleOS = b.AngleOS, b.AngleTS
-			b.Angle2TS, b.Angle2OS = b.Angle2OS, b.Angle2TS
-			b.DepthTS, b.DepthOS = b.DepthOS, b.DepthTS
-			b.ChamferWidthTS, b.ChamferWidthOS = b.ChamferWidthOS, b.ChamferWidthTS
-			b.Angle2Wts, b.Angle2Wos = b.Angle2Wos, b.Angle2Wts
-			b.ChamferHeightTS, b.ChamferHeightOS = b.ChamferHeightOS, b.ChamferHeightTS
-			s.BevelData = b
-		}
+		g.Contour.invert()
 	}
 }

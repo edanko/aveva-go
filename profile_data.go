@@ -62,14 +62,14 @@ type ProfileData struct {
 	Mirror           string
 	Form             string
 	BendDirection    string
-	LeftEnd          *End
-	RightEnd         *End
-	Holes            []*Holes
+	LeftEnd          End
+	RightEnd         End
+	Holes            []Hole
 	Quantity         int
 }
 
-func readProfileData(s *bufio.Scanner) *ProfileData {
-	p := new(ProfileData)
+func readProfileData(s *bufio.Scanner) ProfileData {
+	var p ProfileData
 
 next:
 	for s.Scan() {
