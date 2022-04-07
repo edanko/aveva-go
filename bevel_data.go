@@ -32,8 +32,8 @@ type BevelData struct {
 	WeldOS          float64
 }
 
-func readBevelData(s *bufio.Scanner) *BevelData {
-	bd := new(BevelData)
+func readBevelData(s *bufio.Scanner) BevelData {
+	var bd BevelData
 
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")

@@ -12,8 +12,8 @@ type GeneralData struct {
 	NoOfParts int
 }
 
-func readGeneralData(s *bufio.Scanner) *GeneralData {
-	g := new(GeneralData)
+func readGeneralData(s *bufio.Scanner) GeneralData {
+	var g GeneralData
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")
 

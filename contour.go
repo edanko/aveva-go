@@ -7,8 +7,8 @@ import (
 )
 
 type Contour struct {
-	ExcessData *ExcessData
-	Segments   []*Segment
+	ExcessData ExcessData
+	Segments   []Segment
 }
 
 // for profile segment used only amp*, sweep, u and v
@@ -18,22 +18,48 @@ type Segment struct {
 	Amp       float64
 	Radius    float64
 	Sweep     float64
-	Origin    *Point
-	Start     *Point
-	End       *Point
+	Origin    Point
+	Start     Point
+	End       Point
 	BevelData *BevelData
 }
 
-func readContour(s *bufio.Scanner) *Contour {
-	con := new(Contour)
+func (c *Contour) invert() {
+	if c == nil {
+		return
+	}
 
-	var currentBevel *BevelData
+	for _, s := range c.Segments {
+		s.Sweep = -s.Sweep
+		s.Origin.X = -s.Origin.X
+		s.Start.X = -s.Start.X
+		s.End.X = -s.End.X
+
+		if s.BevelData != nil && s.BevelData.BevelCode != 0 {
+			b := s.BevelData
+
+			b.BevelCode = -b.BevelCode
+			b.AngleTS, b.AngleOS = b.AngleOS, b.AngleTS
+			b.Angle2TS, b.Angle2OS = b.Angle2OS, b.Angle2TS
+			b.DepthTS, b.DepthOS = b.DepthOS, b.DepthTS
+			b.ChamferWidthTS, b.ChamferWidthOS = b.ChamferWidthOS, b.ChamferWidthTS
+			b.Angle2Wts, b.Angle2Wos = b.Angle2Wos, b.Angle2Wts
+			b.ChamferHeightTS, b.ChamferHeightOS = b.ChamferHeightOS, b.ChamferHeightTS
+			s.BevelData = b
+		}
+	}
+}
+
+func readContour(s *bufio.Scanner) Contour {
+	var con Contour
+
+	var currentBevel BevelData
 
 	segmentFinished := false
-	seg := new(Segment)
-	origin := new(Point)
-	start := new(Point)
-	end := new(Point)
+	var seg Segment
+	var origin Point
+	var start Point
+	var end Point
 
 next:
 	for s.Scan() {
@@ -107,12 +133,12 @@ next:
 				seg.Start = start
 			}
 
-			seg.BevelData = currentBevel
+			seg.BevelData = &currentBevel
 			con.Segments = append(con.Segments, seg)
 
-			seg = new(Segment)
-			origin = new(Point)
-			end = new(Point)
+			seg = Segment{}
+			origin = Point{}
+			end = Point{}
 			segmentFinished = false
 		}
 	}
