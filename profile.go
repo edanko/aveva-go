@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func ReadListedProfile(r io.Reader) map[string]ProfileData {
+func ReadListedProfile(r io.Reader) map[string]*ProfileData {
 	s := bufio.NewScanner(r)
 
 	// type
@@ -18,8 +18,8 @@ func ReadListedProfile(r io.Reader) map[string]ProfileData {
 	// usage
 	s.Scan()
 
-	var commonData CommonData
-	profs := make(map[string]ProfileData)
+	var commonData *CommonData
+	profs := make(map[string]*ProfileData)
 
 	for s.Scan() {
 		t := s.Text()

@@ -24,11 +24,11 @@ type MarkingData struct {
 	MtrlSideU               float64
 	MtrlSideV               float64
 	InclinationAngle        float64
-	Contour                 Contour
+	Contour                 *Contour
 }
 
-func readMarkingData(s *bufio.Scanner) MarkingData {
-	var m MarkingData
+func readMarkingData(s *bufio.Scanner) *MarkingData {
+	m := new(MarkingData)
 next:
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")

@@ -21,23 +21,24 @@ type PartData struct {
 	ExtensionU         float64
 	ExtensionV         float64
 	PlateSide          string
-	PartCog            Point
+	PartCog            *Point
 	NoIntervalsExcess1 int
 	LengthExcess1      float64
 	NoIntervalsExcess2 int
 	LengthExcess2      float64
 	NoIntervalsExcess3 int
 	LengthExcess3      float64
-	StringData         []StringData
-	BurningData        []BurningData
-	MarkingData        []MarkingData
-	GeometryData       []GeometryData
+	StringData         []*StringData
+	BurningData        []*BurningData
+	MarkingData        []*MarkingData
+	GeometryData       []*GeometryData
 	Quantity           int
 }
 
-func readPartData(s *bufio.Scanner) PartData {
-	var p PartData
-	var partCog Point
+func readPartData(s *bufio.Scanner) *PartData {
+	p := new(PartData)
+
+	partCog := new(Point)
 
 next:
 	for s.Scan() {
