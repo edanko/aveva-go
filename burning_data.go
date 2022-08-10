@@ -17,19 +17,18 @@ type BurningData struct {
 	GeometryValidFor int
 	DistanceY1Y2     float64
 	GeometryData     *GeometryData
-	Contour          Contour
+	Contour          *Contour
 }
 
-func readBurningData(s *bufio.Scanner) BurningData {
-	var b BurningData
+func readBurningData(s *bufio.Scanner) *BurningData {
+	b := new(BurningData)
 next:
 	for s.Scan() {
 		k, v, ok := strings.Cut(s.Text(), "=")
 
 		switch k {
 		case "GEOMETRY_DATA":
-			gd := readGeometryData(s)
-			b.GeometryData = &gd
+			b.GeometryData = readGeometryData(s)
 			continue next
 
 		case "START_OF_CONTOUR":

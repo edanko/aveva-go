@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-func ReadPlate(r io.Reader) map[string]PartData {
+func ReadPlate(r io.Reader) map[string]*PartData {
 	s := bufio.NewScanner(r)
 
-	var generalData GeneralData
+	var generalData *GeneralData
 	s.Scan()
 	if s.Text() == "GENERAL_DATA" {
 		generalData = readGeneralData(s)
@@ -17,7 +17,7 @@ func ReadPlate(r io.Reader) map[string]PartData {
 		return nil
 	}
 
-	parts := make(map[string]PartData)
+	parts := make(map[string]*PartData)
 	var lastPartName string
 
 	for s.Scan() {
@@ -29,7 +29,6 @@ func ReadPlate(r io.Reader) map[string]PartData {
 
 			if p, ok := parts[pd.Name]; ok {
 				p.Quantity++
-				parts[pd.Name] = p
 			} else {
 				parts[pd.Name] = pd
 			}
@@ -62,21 +61,15 @@ func ReadPlate(r io.Reader) map[string]PartData {
 
 		case "MARKING_DATA":
 			md := readMarkingData(s)
-			if entry, ok := parts[lastPartName]; ok {
-				entry.MarkingData = append(parts[lastPartName].MarkingData, md)
-			}
+			parts[lastPartName].MarkingData = append(parts[lastPartName].MarkingData, md)
 
 		case "GEOMETRY_DATA":
 			gd := readGeometryData(s)
-			if entry, ok := parts[lastPartName]; ok {
-				entry.GeometryData = append(parts[lastPartName].GeometryData, gd)
-			}
+			parts[lastPartName].GeometryData = append(parts[lastPartName].GeometryData, gd)
 
 		case "STRING_DATA":
 			sd := readStringData(s)
-			if entry, ok := parts[lastPartName]; ok {
-				entry.StringData = append(parts[lastPartName].StringData, sd)
-			}
+			parts[lastPartName].StringData = append(parts[lastPartName].StringData, sd)
 
 		case "BUMP_DATA":
 			for s.Scan() {
@@ -104,9 +97,7 @@ func ReadPlate(r io.Reader) map[string]PartData {
 
 		case "BURNING_DATA":
 			b := readBurningData(s)
-			if entry, ok := parts[lastPartName]; ok {
-				entry.BurningData = append(parts[lastPartName].BurningData, b)
-			}
+			parts[lastPartName].BurningData = append(parts[lastPartName].BurningData, b)
 
 		case "EDGE_DATA":
 			for s.Scan() {
