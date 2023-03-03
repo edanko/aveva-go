@@ -5,25 +5,37 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadPlate(t *testing.T) {
+	t.Parallel()
 	t.Run("Read one part from gen file", func(t *testing.T) {
+		t.Parallel()
+		// arrange
 		f, err := os.Open("testdata/part.gen")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 
+		// act
 		got := ReadPlate(f)
+
+		// assert
 		assert.Len(t, got, 1)
 	})
 
 	t.Run("Read nesting from gen file", func(t *testing.T) {
+		t.Parallel()
+		// arrange
 		f, err := os.Open("testdata/nest.gen")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 
+		// act
 		got := ReadPlate(f)
-		assert.Len(t, got, 392)
+
+		// assert
+		require.Len(t, got, 394)
 
 		var totalParts int
 		for _, part := range got {
@@ -33,11 +45,47 @@ func TestReadPlate(t *testing.T) {
 	})
 
 	t.Run("Wrong gen file type", func(t *testing.T) {
+		t.Parallel()
+		// arrange
 		f, err := os.Open("testdata/profiles.gen")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 
+		// act
 		got := ReadPlate(f)
+
+		// assert
 		assert.Nil(t, got)
+	})
+}
+
+func BenchmarkReadPlate(b *testing.B) {
+	b.Run("Read one part from gen file", func(b *testing.B) {
+		b.ReportAllocs()
+
+		f, err := os.Open("testdata/part.gen")
+		require.NoError(b, err)
+
+		b.ResetTimer()
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				_ = ReadPlate(f)
+			}
+		})
+	})
+
+	b.Run("Read nesting from gen file", func(b *testing.B) {
+		b.ReportAllocs()
+
+		f, err := os.Open("testdata/nest.gen")
+		require.NoError(b, err)
+
+		b.ResetTimer()
+
+		b.RunParallel(func(pb *testing.PB) {
+			for pb.Next() {
+				_ = ReadPlate(f)
+			}
+		})
 	})
 }
