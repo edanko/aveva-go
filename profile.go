@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-func ReadListedProfile(r io.Reader) map[string]*ProfileData {
+func ReadProfile(r io.Reader) []*ProfileData {
 	s := bufio.NewScanner(r)
 
 	// type
@@ -18,27 +18,24 @@ func ReadListedProfile(r io.Reader) map[string]*ProfileData {
 	// usage
 	s.Scan()
 
-	var commonData *CommonData
-	profs := make(map[string]*ProfileData)
+	// common data
+	s.Scan()
+	if s.Text() != "COMMON_DATA" {
+		return nil
+	}
+	commonData := readCommonData(s)
+	profs := make([]*ProfileData, 0, commonData.NoOfProfs)
 
 	for s.Scan() {
 		t := s.Text()
 		switch t {
-		case "COMMON_DATA":
-			commonData = readCommonData(s)
-
 		case "PROFILE_DATA":
 			pd := readProfileData(s)
 			pd.Shape = commonData.Shape
 			pd.Dimension = commonData.Dimension
 			pd.Quality = commonData.Quality
 
-			// TODO: think about map key, may be better use pd.BlockNo+pd.PosNo
-			if p, ok := profs[pd.Name]; ok {
-				p.Quantity++
-			} else {
-				profs[pd.Name] = pd
-			}
+			profs = append(profs, pd)
 
 		case "REST_DATA":
 			for s.Scan() {
