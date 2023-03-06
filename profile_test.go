@@ -8,11 +8,11 @@ import (
 )
 
 func TestReadListedProfile(t *testing.T) {
-	t.Run("Read Listed Profile", func(t *testing.T) {
+	t.Run("Read Profile", func(t *testing.T) {
 		f, err := os.Open("testdata/profiles.gen")
 		assert.NoError(t, err)
 
-		got := ReadListedProfile(f)
+		got := ReadProfile(f)
 		assert.Len(t, got, 440)
 
 		var totalParts int
@@ -27,7 +27,7 @@ func TestReadListedProfile(t *testing.T) {
 		assert.NoError(t, err)
 		defer f.Close()
 
-		got := ReadListedProfile(f)
+		got := ReadProfile(f)
 		assert.Nil(t, got)
 	})
 }
