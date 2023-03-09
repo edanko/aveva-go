@@ -1,4 +1,4 @@
-module github.com/edanko/gen
+module github.com/edanko/aveva-go
 
 go 1.19
 
