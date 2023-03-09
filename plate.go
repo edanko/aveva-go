@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ReadPlate(r io.Reader) map[string]*PartData {
+func ReadPlate(r io.Reader) []*PartData {
 	s := bufio.NewScanner(r)
 
 	var generalData *GeneralData
@@ -17,8 +17,15 @@ func ReadPlate(r io.Reader) map[string]*PartData {
 		return nil
 	}
 
-	parts := make(map[string]*PartData)
-	var lastPartName string
+	space := 1
+	if generalData.NoOfParts > 0 {
+		space = generalData.NoOfParts
+	}
+
+	parts := make([]*PartData, 0, space)
+	nameIndex := make(map[string]int, space)
+
+	var lastPartIdx int
 
 	for s.Scan() {
 		switch s.Text() {
@@ -27,15 +34,8 @@ func ReadPlate(r io.Reader) map[string]*PartData {
 			pd.Thickness = generalData.Thickness
 			pd.Quality = generalData.Quality
 
-			if p, ok := parts[pd.Name]; ok {
-				p.Quantity++
-			} else {
-				parts[pd.Name] = pd
-			}
-
-			if generalData.NoOfParts == 0 {
-				lastPartName = pd.Name
-			}
+			parts = append(parts, pd)
+			nameIndex[pd.Name] = len(parts) - 1
 
 		case "PART_INFORMATION":
 			for s.Scan() {
@@ -47,7 +47,7 @@ func ReadPlate(r io.Reader) map[string]*PartData {
 
 				switch k {
 				case "PART_NAME":
-					lastPartName = v
+					lastPartIdx = nameIndex[v]
 				}
 			}
 
@@ -61,15 +61,15 @@ func ReadPlate(r io.Reader) map[string]*PartData {
 
 		case "MARKING_DATA":
 			md := readMarkingData(s)
-			parts[lastPartName].MarkingData = append(parts[lastPartName].MarkingData, md)
+			parts[lastPartIdx].MarkingData = append(parts[lastPartIdx].MarkingData, md)
 
 		case "GEOMETRY_DATA":
 			gd := readGeometryData(s)
-			parts[lastPartName].GeometryData = append(parts[lastPartName].GeometryData, gd)
+			parts[lastPartIdx].GeometryData = append(parts[lastPartIdx].GeometryData, gd)
 
 		case "STRING_DATA":
 			sd := readStringData(s)
-			parts[lastPartName].StringData = append(parts[lastPartName].StringData, sd)
+			parts[lastPartIdx].StringData = append(parts[lastPartIdx].StringData, sd)
 
 		case "BUMP_DATA":
 			for s.Scan() {
@@ -97,7 +97,7 @@ func ReadPlate(r io.Reader) map[string]*PartData {
 
 		case "BURNING_DATA":
 			b := readBurningData(s)
-			parts[lastPartName].BurningData = append(parts[lastPartName].BurningData, b)
+			parts[lastPartIdx].BurningData = append(parts[lastPartIdx].BurningData, b)
 
 		case "EDGE_DATA":
 			for s.Scan() {
