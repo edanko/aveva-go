@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,16 +16,17 @@ func TestReadListedProfile(t *testing.T) {
 		require.NoError(t, err)
 
 		// act
-		got := ReadProfile(f)
+		got, err := ReadProfiles(f)
 
 		// assert
+		require.NoError(t, err)
 		require.Len(t, got, 440)
 
 		var totalParts int
 		for _, part := range got {
 			totalParts += part.Quantity
 		}
-		assert.Equal(t, totalParts, 440)
+		require.Equal(t, 440, totalParts)
 	})
 
 	t.Run("Wrong gen file type", func(t *testing.T) {
@@ -37,10 +37,11 @@ func TestReadListedProfile(t *testing.T) {
 		defer f.Close()
 
 		// act
-		got := ReadProfile(f)
+		got, err := ReadProfiles(f)
 
 		// assert
-		assert.Nil(t, got)
+		require.ErrorIs(t, err, ErrNotListedProfile)
+		require.Nil(t, got)
 	})
 }
 
@@ -50,13 +51,10 @@ func BenchmarkReadListedProfile(b *testing.B) {
 
 		f, err := os.Open("testdata/profiles.gen")
 		require.NoError(b, err)
+		defer f.Close()
 
-		b.ResetTimer()
-		b.RunParallel(func(pb *testing.PB) {
-			for pb.Next() {
-				_ = ReadProfile(f)
-			}
-		})
-
+		for b.Loop() {
+			_, _ = ReadProfiles(f)
+		}
 	})
 }

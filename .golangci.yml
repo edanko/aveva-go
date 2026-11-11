@@ -1,0 +1,150 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  # standard = errcheck, govet, ineffassign, staticcheck, unused
+  default: standard
+
+  enable:
+    - bodyclose
+    - copyloopvar
+    - dupl
+    - durationcheck
+    - errorlint
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gosec
+    - makezero
+    - misspell
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+
+  settings:
+    dupl:
+      # The readers share a long explicit switch per section; that repetition is
+      # the format's, not the code's, so the threshold is generous.
+      threshold: 200
+    gocyclo:
+      # The section readers are long, flat switches over a fixed key vocabulary.
+      # Splitting them would scatter one format's grammar across many functions,
+      # so the threshold is set above them deliberately.
+      min-complexity: 70
+    goconst:
+      # Format keys are a fixed vocabulary that legitimately repeats across
+      # reader, writer and tests; extracting them would not add clarity.
+      min-len: 6
+      min-occurrences: 12
+    godot:
+      scope: declarations
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+    revive:
+      # exported-comment enforcement is left off for now: the package predates
+      # it and enabling it would flag ~30 pre-existing symbols. Turn it on as
+      # those are documented.
+
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+          disabled: true
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: package-comments
+          disabled: true
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: var-declaration
+        - name: var-naming
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+      disabled-checks:
+        # Style preferences that fight this codebase's shape.
+        - unnamedResult
+        - paramTypeCombine
+        - singleCaseSwitch
+        - defaultCaseOrder
+        - importShadow
+        # Passing parsed values by pointer would make the model mutable in
+        # places it is deliberately value-based; the copies are small and cold.
+        - hugeParam
+        - rangeValCopy
+    testifylint:
+      disable:
+        # The writer tests assert bit-exact float preservation on purpose: a
+        # round-trip that changes a value by 1e-12 is a bug, not a tolerance.
+        - float-compare
+
+  exclusions:
+    generated: lax
+    rules:
+      # Tests may be long, repetitive and less defensive than library code.
+      - path: _test\.go
+        linters:
+          - dupl
+          - gocyclo
+          - errcheck
+          - gosec
+          - noctx
+          - prealloc
+          - unparam
+          - goconst
+      # The writer emits one line per field; that is deliberately flat.
+      - path: (^|/)write\.go
+        linters:
+          - dupl
+          - gocyclo
+      - path: (^|/)profile_write\.go
+        linters:
+          - dupl
+          - gocyclo
+      # Section readers are one flat switch over the format's key vocabulary;
+      # their complexity is the grammar's, not the function's. Splitting them
+      # would scatter one format across many call sites.
+      - path: (part|plate|end|profile|common_data|general_data|contour|hole|marking|label)\.go
+        linters:
+          - gocyclo
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/edanko/aveva-go
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -16,50 +16,91 @@ type BurningData struct {
 	NumberOfHeads    int
 	GeometryValidFor int
 	DistanceY1Y2     float64
-	GeometryData     *GeometryData
+	GeometryData     *Geometry
 	Contour          *Contour
+	HoleShipside     string
+	Auxiliaries      []Auxiliary
 }
 
-func readBurningData(s *bufio.Scanner) *BurningData {
-	b := new(BurningData)
+func readBurningData(s *bufio.Scanner) (BurningData, error) {
+	b := BurningData{}
 next:
 	for s.Scan() {
-		k, v, ok := strings.Cut(s.Text(), "=")
+		key, value, found := strings.Cut(s.Text(), "=")
 
-		switch k {
+		switch key {
 		case "GEOMETRY_DATA":
-			b.GeometryData = readGeometryData(s)
+			geometryData, err := readGeometry(s)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.GeometryData = &geometryData
 			continue next
 
 		case "START_OF_CONTOUR":
-			b.Contour = readContour(s)
+			contour, err := readContour(s)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.Contour = contour
+			continue next
+
+		case "AUXILIARY_DATA":
+			a, err := readAuxiliary(s)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.Auxiliaries = append(b.Auxiliaries, a)
 			continue next
 		}
 
-		if !ok {
+		if !found {
 			break
 		}
 
-		switch k {
+		switch key {
 		case "SHAPE":
-			b.Shape = v
+			b.Shape = value
 		case "START_END_IN_GAP":
-			b.StartEndInGap = v
+			b.StartEndInGap = value
 		case "BEVEL_DEFINED":
-			b.BevelDefined = v
+			b.BevelDefined = value
 		case "DIRECTION":
-			b.Direction, _ = strconv.Atoi(v)
+			direction, err := strconv.Atoi(value)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.Direction = direction
 		case "DESIGNATION":
-			b.Designation = v
+			b.Designation = value
 		case "PART_ID":
-			b.PartID, _ = strconv.Atoi(v)
+			partID, err := strconv.Atoi(value)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.PartID = partID
 		case "NUMBER_OF_HEADS":
-			b.NumberOfHeads, _ = strconv.Atoi(v)
+			numberOfHeads, err := strconv.Atoi(value)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.NumberOfHeads = numberOfHeads
 		case "GEOMETRY_VALID_FOR":
-			b.GeometryValidFor, _ = strconv.Atoi(v)
+			geometryValidFor, err := strconv.Atoi(value)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.GeometryValidFor = geometryValidFor
 		case "DISTANCE_Y1_Y2":
-			b.DistanceY1Y2, _ = strconv.ParseFloat(v, 64)
+			distanceY1Y2, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				return BurningData{}, err
+			}
+			b.DistanceY1Y2 = distanceY1Y2
+
+		case "HOLE_SHIPSIDE":
+			b.HoleShipside = value
 		}
 	}
-	return b
+	return b, nil
 }
