@@ -1,0 +1,8 @@
+name: "aveva-go CodeQL"
+
+queries:
+  - uses: security-extended
+
+paths-ignore:
+  - testdata
+  - "**/*_test.go"

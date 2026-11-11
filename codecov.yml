@@ -1,0 +1,18 @@
+coverage:
+  status:
+    project:
+      default:
+        # The parsers are thoroughly covered; writers and CLIs less so.
+        target: 70%
+        threshold: 2%
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+
+  ignore:
+    - "**/*_test.go"
+
+comment:
+  layout: "reach,diff,flags,files"
+  require_changes: true
