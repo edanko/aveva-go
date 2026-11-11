@@ -6,6 +6,7 @@
 [![Lint](https://github.com/edanko/aveva-go/actions/workflows/lint.yml/badge.svg)](https://github.com/edanko/aveva-go/actions/workflows/lint.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/edanko/aveva-go.svg)](https://pkg.go.dev/github.com/edanko/aveva-go)
 [![Go version](https://img.shields.io/github/go-mod/go-version/edanko/aveva-go)](go.mod)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A `.gen` file is line-oriented `KEY=VALUE` text that a shipyard's nesting software
 emits for each plate or profile. There are two document families — `PLATE_PART`
@@ -245,3 +246,7 @@ This is an independent, unofficial project. It is not affiliated with or endorse
 by AVEVA. The grammar was reconstructed by static analysis of the shipped
 components and by measurement over real production files; anything inferred rather
 than measured is marked as such where it is documented.
+
+## License
+
+MIT. See [LICENSE](LICENSE) for the full text.
