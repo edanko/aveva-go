@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths"
+  ],
+  "rangeStrategy": "bump",
+  "separateMajorMinor": true,
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Go module minor and patch updates: one PR, merge when green",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "go minor/patch",
+      "automerge": true
+    },
+    {
+      "description": "Indirect dependencies move together with their parents",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "groupName": "go indirect",
+      "automerge": true
+    },
+    {
+      "description": "Major updates need a human: API may break",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major"]
+    },
+    {
+      "description": "Test and lint tooling can move faster than library code",
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["github.com/stretchr/testify", "github.com/golangci/golangci-lint"],
+      "groupName": "go tooling",
+      "automerge": true
+    },
+    {
+      "description": "GitHub Actions: group and automerge",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "automerge": true
+    },
+    {
+      "description": "The go directive is tied to the toolchain, not a library",
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "enabled": false
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "schedule": ["before 6am on monday"]
+}
