@@ -14,38 +14,51 @@ type StringData struct {
 	String string
 }
 
-func readStringData(s *bufio.Scanner) *StringData {
-	sd := new(StringData)
-	pos := new(Point)
+func readStringData(s *bufio.Scanner) (StringData, error) {
+	stringData := StringData{
+		Pos: &Point{},
+	}
+
+	var err error
 
 	for s.Scan() {
-		k, v, ok := strings.Cut(s.Text(), "=")
-
-		if !ok {
+		key, value, found := strings.Cut(s.Text(), "=")
+		if !found {
 			break
 		}
 
-		switch k {
+		switch key {
 		case "STRING_TYPE":
-			sd.Type = v
+			stringData.Type = value
 
 		case "STRING_POSITION_U":
-			pos.X, _ = strconv.ParseFloat(v, 64)
+			stringData.Pos.X, err = strconv.ParseFloat(value, 64)
+			if err != nil {
+				return StringData{}, err
+			}
 
 		case "STRING_POSITION_V":
-			pos.Y, _ = strconv.ParseFloat(v, 64)
+			stringData.Pos.Y, err = strconv.ParseFloat(value, 64)
+			if err != nil {
+				return StringData{}, err
+			}
 
 		case "STRING_ANGLE":
-			sd.Angle, _ = strconv.ParseFloat(v, 64)
+			stringData.Angle, err = strconv.ParseFloat(value, 64)
+			if err != nil {
+				return StringData{}, err
+			}
 
 		case "STRING_HEIGHT":
-			sd.Height, _ = strconv.ParseFloat(v, 64)
+			stringData.Height, err = strconv.ParseFloat(value, 64)
+			if err != nil {
+				return StringData{}, err
+			}
 
 		case "STRING":
-			sd.String = v
+			stringData.String = value
 		}
 	}
 
-	sd.Pos = pos
-	return sd
+	return stringData, nil
 }
