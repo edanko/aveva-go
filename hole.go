@@ -2,8 +2,6 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
 )
 
 type Hole struct {
@@ -28,7 +26,7 @@ func parseHole(s *bufio.Scanner) (*Hole, error) {
 
 next:
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "START_OF_CONTOUR" {
 			contour, err := readContour(s)
@@ -74,59 +72,59 @@ next:
 
 		switch key {
 		case "OPEN":
-			open, err := strconv.Atoi(value)
+			open, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.Open = open
 
 		case "DIST_ORIGIN":
-			distOrigin, err := strconv.ParseFloat(value, 64)
+			distOrigin, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.DistOrigin = distOrigin
 
 		case "DIST_ORIGIN_TO_ZEROP":
-			distOriginToZeroP, err := strconv.ParseFloat(value, 64)
+			distOriginToZeroP, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.DistOriginToZeroP = distOriginToZeroP
 
 		case "DIST_ORIGIN_V":
-			distOriginV, err := strconv.ParseFloat(value, 64)
+			distOriginV, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.DistOriginV = distOriginV
 
 		case "TYPE":
-			kind, err := strconv.Atoi(value)
+			kind, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.Type = kind
 
 		case "ROTATION":
-			rotation, err := strconv.ParseFloat(value, 64)
+			rotation, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.Rotation = rotation
 
 		case "MIRROR":
-			mirror, err := strconv.Atoi(value)
+			mirror, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			hole.Mirror = mirror
 
 		case "NAME":
-			hole.Name = value
+			hole.Name = string(value)
 
 		case "DIST_LEFT":
-			distLeft, err := strconv.ParseFloat(value, 64)
+			distLeft, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
@@ -152,7 +150,7 @@ func readPenetratingProfile(s *bufio.Scanner) (*PenetratingProfile, error) {
 	p := &PenetratingProfile{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "END_OF_PENETRATING_PROFILE" {
 			return p, nil
@@ -166,13 +164,13 @@ func readPenetratingProfile(s *bufio.Scanner) (*PenetratingProfile, error) {
 
 		switch key {
 		case "DIM":
-			p.Dim, err = parseOptFloat(value)
+			p.Dim, err = parseOptBytes(value)
 		case "INTERSECTING_ANGLE":
-			p.IntersectingAngle, err = parseOptFloat(value)
+			p.IntersectingAngle, err = parseOptBytes(value)
 		case "INCLINATION_ANGLE":
-			p.InclinationAngle, err = parseOptFloat(value)
+			p.InclinationAngle, err = parseOptBytes(value)
 		case "MTRL_PENETRATING":
-			p.MtrlPenetrating = cleanStr(value)
+			p.MtrlPenetrating = cleanBytes(value)
 		}
 
 		if err != nil {
@@ -194,13 +192,13 @@ func readDrilling(s *bufio.Scanner) (*Drilling, error) {
 	d := &Drilling{}
 
 	for s.Scan() {
-		key, _, found := strings.Cut(s.Text(), "=")
+		key, _, found := nextKeyValue(s)
 
 		switch key {
 		case "THREADING":
 			d.Threaded = true
 			for s.Scan() {
-				k, v, ok := strings.Cut(s.Text(), "=")
+				k, v, ok := nextKeyValue(s)
 				if k == "END_OF_THREADING" {
 					break
 				}
@@ -208,7 +206,7 @@ func readDrilling(s *bufio.Scanner) (*Drilling, error) {
 					return d, nil
 				}
 				if k == "THREAD_START" {
-					start, err := parseOptFloat(v)
+					start, err := parseOptBytes(v)
 					if err != nil {
 						return nil, err
 					}
@@ -239,7 +237,7 @@ func readSlotted(s *bufio.Scanner) (*Slotted, error) {
 	sl := &Slotted{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "END_OF_SLOTTED" {
 			return sl, nil
@@ -253,9 +251,9 @@ func readSlotted(s *bufio.Scanner) (*Slotted, error) {
 
 		switch key {
 		case "LENGTH":
-			sl.Length, err = parseOptFloat(value)
+			sl.Length, err = parseOptBytes(value)
 		case "WIDTH":
-			sl.Width, err = parseOptFloat(value)
+			sl.Width, err = parseOptBytes(value)
 		}
 
 		if err != nil {

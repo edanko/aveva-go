@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"strconv"
 	"strings"
 )
 
@@ -101,7 +100,7 @@ func ReadProfileDocument(r io.Reader) (*ProfileDocument, error) {
 			"BENDING_TABLE", "GENERAL_MARKING_DATA", "CURVE_DATA", "CURVE_3D_DATA":
 			// Present in the mar.dll writer but absent from every sample;
 			// capture verbatim rather than dropping.
-			name := s.Text()
+			name := string(s.Bytes())
 			rs, err := readRawSection(s, name)
 			if err != nil {
 				return nil, err
@@ -242,7 +241,7 @@ func readProfile(s *bufio.Scanner) (*Profile, error) {
 
 next:
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		switch key {
 		case "LEFT_END":
@@ -297,519 +296,519 @@ next:
 
 		switch key {
 		case "NAME":
-			profile.Name = value
+			profile.Name = string(value)
 
 		case "POSNO":
-			profile.PosNo = value
+			profile.PosNo = string(value)
 
 		case "MLENGTH":
-			mLength, err := strconv.ParseFloat(value, 64)
+			mLength, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.MLength = mLength
 
 		case "MLENGTH_MANUAL":
-			mLengthManual, err := strconv.ParseFloat(value, 64)
+			mLengthManual, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.MLengthManual = mLengthManual
 
 		case "TLENGTH":
-			tLength, err := strconv.ParseFloat(value, 64)
+			tLength, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.TLength = tLength
 
 		case "TLENGTH_MANUAL":
-			tLengthManual, err := strconv.ParseFloat(value, 64)
+			tLengthManual, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.TLengthManual = tLengthManual
 
 		case "END_POINT_DIST":
-			endPointDist, err := strconv.ParseFloat(value, 64)
+			endPointDist, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.EndPointDist = endPointDist
 
 		case "END_POINT_DIST_PROD":
-			endPointDistProd, err := strconv.ParseFloat(value, 64)
+			endPointDistProd, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.EndPointDistProd = endPointDistProd
 
 		case "TRACE_LENGTH":
-			traceLength, err := strconv.ParseFloat(value, 64)
+			traceLength, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.TraceLength = traceLength
 
 		case "TRACE_LENGTH_PROD":
-			traceLengthProd, err := strconv.ParseFloat(value, 64)
+			traceLengthProd, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.TraceLengthProd = traceLengthProd
 
 		case "TWIST_ANGLE":
-			twistAngle, err := strconv.ParseFloat(value, 64)
+			twistAngle, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.TwistAngle = twistAngle
 
 		case "SHIP_NO":
-			profile.ShipNo = value
+			profile.ShipNo = string(value)
 
 		case "SHIP_NAME":
-			profile.ShipName = value
+			profile.ShipName = string(value)
 
 		case "PROF_SIDE":
-			profile.ProfSide = value
+			profile.ProfSide = string(value)
 
 		case "SIDE_UP":
-			profile.SideUp = value
+			profile.SideUp = string(value)
 
 		case "DIRECTION":
-			profile.Direction = value
+			profile.Direction = string(value)
 
 		case "DIRECTION_SIGN":
-			profile.DirectionSign = value
+			profile.DirectionSign = string(value)
 
 		case "DIRECTION_TRACE":
-			profile.DirectionTrace = value
+			profile.DirectionTrace = string(value)
 
 		case "BEVEL_TRACE":
-			bevelTrace, err := strconv.Atoi(value)
+			bevelTrace, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.BevelTrace = bevelTrace
 
 		case "BEVEL_CODE":
-			bevelCode, err := strconv.Atoi(value)
+			bevelCode, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.BevelCode = bevelCode
 
 		case "BEVEL_NAME":
-			profile.BevelName = value
+			profile.BevelName = string(value)
 
 		case "BEVEL_TYPE":
-			bevelType, err := strconv.Atoi(value)
+			bevelType, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.BevelType = bevelType
 
 		case "BEVEL_VARIANT":
-			bevelVariant, err := strconv.Atoi(value)
+			bevelVariant, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.BevelVariant = bevelVariant
 
 		case "E":
-			e, err := strconv.ParseFloat(value, 64)
+			e, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.E = e
 
 		case "GAP":
-			gap, err := strconv.ParseFloat(value, 64)
+			gap, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Gap = gap
 
 		case "CHAMFER_TS":
-			chamferTs, err := strconv.ParseFloat(value, 64)
+			chamferTs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferTS = chamferTs
 
 		case "CHAMFER_OS":
-			chamferOs, err := strconv.ParseFloat(value, 64)
+			chamferOs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferOS = chamferOs
 
 		case "ALPHA":
-			alpha, err := strconv.ParseFloat(value, 64)
+			alpha, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Alpha = alpha
 
 		case "BETA":
-			beta, err := strconv.ParseFloat(value, 64)
+			beta, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Beta = beta
 
 		case "NOSE":
-			nose, err := strconv.ParseFloat(value, 64)
+			nose, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Nose = nose
 
 		case "H":
-			h, err := strconv.ParseFloat(value, 64)
+			h, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.H = h
 
 		case "H_FACT":
-			hFact, err := strconv.ParseFloat(value, 64)
+			hFact, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.HFact = hFact
 
 		case "H_FACT_ADJUST":
-			hFactAdjust, err := strconv.ParseFloat(value, 64)
+			hFactAdjust, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.HFactAdjust = hFactAdjust
 
 		case "ANGLE_TS":
-			angleTs, err := strconv.ParseFloat(value, 64)
+			angleTs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.AngleTS = angleTs
 
 		case "ANGLE_OS":
-			angleOs, err := strconv.ParseFloat(value, 64)
+			angleOs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.AngleOS = angleOs
 
 		case "DEPTH_TS":
-			depthTs, err := strconv.ParseFloat(value, 64)
+			depthTs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.DepthTS = depthTs
 
 		case "DEPTH_OS":
-			depthOs, err := strconv.ParseFloat(value, 64)
+			depthOs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.DepthOS = depthOs
 
 		case "CHAMFER_WIDTH_TS":
-			chamferWidthTs, err := strconv.ParseFloat(value, 64)
+			chamferWidthTs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferWidthTS = chamferWidthTs
 
 		case "CHAMFER_WIDTH_OS":
-			chamferWidthOs, err := strconv.ParseFloat(value, 64)
+			chamferWidthOs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferWidthOS = chamferWidthOs
 
 		case "CHAMFER_HEIGHT_TS":
-			chamferHeightTs, err := strconv.ParseFloat(value, 64)
+			chamferHeightTs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferHeightTS = chamferHeightTs
 
 		case "CHAMFER_HEIGHT_OS":
-			chamferHeightOs, err := strconv.ParseFloat(value, 64)
+			chamferHeightOs, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ChamferHeightOS = chamferHeightOs
 
 		case "GRINDING":
-			grinding, err := strconv.Atoi(value)
+			grinding, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Grinding = grinding
 
 		case "ASSEMBLY":
-			profile.Assembly = value
+			profile.Assembly = string(value)
 
 		case "ASSEMBLY_HIGH":
-			profile.AssemblyHigh = value
+			profile.AssemblyHigh = string(value)
 
 		case "ASSEMBLY_TOT":
-			profile.AssemblyTotal = value
+			profile.AssemblyTotal = string(value)
 
 		case "SURFACE_TREATMENT":
-			profile.SurfaceTreatment = value
+			profile.SurfaceTreatment = string(value)
 
 		case "BLOCK_NO":
-			profile.BlockNo = value
+			profile.BlockNo = string(value)
 
 		case "BLOCK_NAME":
-			profile.BlockName = value
+			profile.BlockName = string(value)
 
 		case "MIRROR":
-			profile.Mirror = value
+			profile.Mirror = string(value)
 
 		case "FORM":
-			profile.Form = value
+			profile.Form = string(value)
 
 		case "BEND_DIRECTION":
-			profile.BendDirection = value
+			profile.BendDirection = string(value)
 
 		case "GENERATED_AS":
-			profile.GeneratedAs = value
+			profile.GeneratedAs = string(value)
 
 		case "SYMMETRICAL":
-			profile.Symmetrical = value
+			profile.Symmetrical = string(value)
 
 		case "APPROX_PART_WEIGHT":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.ApproxPartWeight = v
 
 		case "IDENT_STRING":
-			profile.IdentString = value
+			profile.IdentString = string(value)
 
 		case "PARTNAME_LONG":
-			profile.PartnameLong = value
+			profile.PartnameLong = string(value)
 
 		case "PARTNAME_SHORT":
-			profile.PartnameShort = value
+			profile.PartnameShort = string(value)
 
 		case "DIRECTION_FACE":
-			profile.DirectionFace = value
+			profile.DirectionFace = string(value)
 
 		case "CHAMFER":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.Chamfer = v
 
 		case "ASSEMBLY_SB":
-			profile.AssemblySB = value
+			profile.AssemblySB = string(value)
 
 		case "ASSEMBLY_TOT_SB":
-			profile.AssemblyTotalSB = value
+			profile.AssemblyTotalSB = string(value)
 
 		case "ASSEMBLY_SEQUENCE":
-			profile.AssemblySequence = value
+			profile.AssemblySequence = string(value)
 
 		case "BAUGRUPPE":
-			profile.Baugruppe = value
+			profile.Baugruppe = string(value)
 
 		case "ZEICHNUNGSNO":
-			profile.Zeichnungsno = value
+			profile.Zeichnungsno = string(value)
 
 		case "ZAEHLNO":
-			profile.Zaehlno = value
+			profile.Zaehlno = string(value)
 
 		case "NO_OF_REF_LINES":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.NoOfRefLines = v
 
 		case "NO_OF_BENDING_TABLES":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.NoOfBendingTables = v
 
 		case "TABLE_TYPE":
-			profile.TableType = value
+			profile.TableType = string(value)
 
 		case "ADDITIONAL_INFO1":
-			profile.AdditionalInfo1 = value
+			profile.AdditionalInfo1 = string(value)
 
 		case "ADDITIONAL_INFO2":
-			profile.AdditionalInfo2 = value
+			profile.AdditionalInfo2 = string(value)
 
 		case "ADDITIONAL_INFO3":
-			profile.AdditionalInfo3 = value
+			profile.AdditionalInfo3 = string(value)
 
 		case "ADDITIONAL_INFO4":
-			profile.AdditionalInfo4 = value
+			profile.AdditionalInfo4 = string(value)
 
 		case "ADDITIONAL_INFO5":
-			profile.AdditionalInfo5 = value
+			profile.AdditionalInfo5 = string(value)
 
 		case "ADDITIONAL_INFO6":
-			profile.AdditionalInfo6 = value
+			profile.AdditionalInfo6 = string(value)
 
 		case "ADDITIONAL_INFO7":
-			profile.AdditionalInfo7 = value
+			profile.AdditionalInfo7 = string(value)
 
 		case "ADDITIONAL_INFO8":
-			profile.AdditionalInfo8 = value
+			profile.AdditionalInfo8 = string(value)
 
 		case "ADDITIONAL_INFO9":
-			profile.AdditionalInfo9 = value
+			profile.AdditionalInfo9 = string(value)
 
 		case "ADDITIONAL_INFO10":
-			profile.AdditionalInfo10 = value
+			profile.AdditionalInfo10 = string(value)
 
 		case "ADDITIONAL_INFO11":
-			profile.AdditionalInfo11 = value
+			profile.AdditionalInfo11 = string(value)
 
 		case "ADDITIONAL_INFO12":
-			profile.AdditionalInfo12 = value
+			profile.AdditionalInfo12 = string(value)
 
 		case "MARKING_LEFT_EXCIST":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.MarkingLeftExcist = v
 
 		case "MARKING_RIGHT_EXCIST":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.MarkingRightExcist = v
 
 		case "NO_OF_MACS":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.NoOfMacs = v
 
 		case "NO_OF_MARKS":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.NoOfMarks = v
 
 		case "KNUCKLE_U_START":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.KnuckleUStart = v
 
 		case "KNUCKLE_V_START":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.KnuckleVStart = v
 
 		case "KNUCKLE_U_END":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.KnuckleUEnd = v
 
 		case "KNUCKLE_V_END":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.KnuckleVEnd = v
 
 		case "KNUCKLE_INCLINATION":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.KnuckleInclination = v
 
 		case "GAP_ADJUST_LEFT":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.GapAdjustLeft = v
 
 		case "GAP_ADJUST_RIGHT":
-			v, err := parseOptFloat(value)
+			v, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			profile.GapAdjustRight = v
 
 		case "CASE":
-			profile.Case = value
+			profile.Case = string(value)
 
 		case "CUST_DATA_1":
-			profile.CustData1 = value
+			profile.CustData1 = string(value)
 
 		case "CUST_DATA_2":
-			profile.CustData2 = value
+			profile.CustData2 = string(value)
 
 		case "CUST_DATA_3":
-			profile.CustData3 = value
+			profile.CustData3 = string(value)
 
 		case "CUST_DATA_4":
-			profile.CustData4 = value
+			profile.CustData4 = string(value)
 
 		case "CUST_TEXT_1":
-			profile.CustText1 = value
+			profile.CustText1 = string(value)
 
 		case "CUST_TEXT_2":
-			profile.CustText2 = value
+			profile.CustText2 = string(value)
 
 		case "CUST_TEXT_3":
-			profile.CustText3 = value
+			profile.CustText3 = string(value)
 
 		case "CUST_TEXT_4":
-			profile.CustText4 = value
+			profile.CustText4 = string(value)
 
 		case "CUST_TEXT_5":
-			profile.CustText5 = value
+			profile.CustText5 = string(value)
 
 		case "CUST_TEXT_6":
-			profile.CustText6 = value
+			profile.CustText6 = string(value)
 
 		case "CUST_TEXT_7":
-			profile.CustText7 = value
+			profile.CustText7 = string(value)
 
 		case "CUST_TEXT_8":
-			profile.CustText8 = value
+			profile.CustText8 = string(value)
 
 		case "CUST_TEXT_9":
-			profile.CustText9 = value
+			profile.CustText9 = string(value)
 
 		case "CUST_TEXT_10":
-			profile.CustText10 = value
+			profile.CustText10 = string(value)
 
 		case "PLANNING_UNIT":
-			profile.PlanningUnit = value
+			profile.PlanningUnit = string(value)
 
 		case "WORKING_LOCATION":
-			profile.WorkingLocation = value
+			profile.WorkingLocation = string(value)
 
 		case "BUILDING_STRATEGY":
-			profile.BuildingStrategy = value
+			profile.BuildingStrategy = string(value)
 		}
 	}
 

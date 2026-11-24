@@ -2,8 +2,7 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
+	"bytes"
 )
 
 type Part struct {
@@ -80,7 +79,7 @@ func readPart(s *bufio.Scanner) (*Part, error) {
 	var partCog Point
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "TRANSFORMATION_DATA" {
 			t, err := readTransformationData(s)
@@ -98,209 +97,209 @@ func readPart(s *bufio.Scanner) (*Part, error) {
 
 		switch key {
 		case "NAME":
-			part.Name = value
+			part.Name = string(value)
 
 		case "POSNO":
-			part.PosNo = value
+			part.PosNo = string(value)
 
 		case "PARTNAME_LONG":
-			part.PartnameLong = value
+			part.PartnameLong = string(value)
 
 		case "PARTNAME_LONG_SB":
-			part.PartnameLongSB = value
+			part.PartnameLongSB = string(value)
 
 		case "SHIP_NO":
-			part.ShipNo = value
+			part.ShipNo = string(value)
 
 		case "ASSEMBLY_LOW":
-			part.AssemblyLow = value
+			part.AssemblyLow = string(value)
 
 		case "ASSEMBLY_LOW_SB":
-			part.AssemblyLowSB = value
+			part.AssemblyLowSB = string(value)
 
 		case "ASSEMBLY_HIGH":
-			part.AssemblyHigh = value
+			part.AssemblyHigh = string(value)
 
 		case "ASSEMBLY_HIGH_SB":
-			part.AssemblyHighSB = value
+			part.AssemblyHighSB = string(value)
 
 		case "BLOCK_NO":
-			part.BlockNo = value
+			part.BlockNo = string(value)
 
 		case "PART_AREA":
-			partArea, err := strconv.ParseFloat(value, 64)
+			partArea, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.PartArea = partArea
 
 		case "MIRRORED":
-			mirrored, err := strconv.ParseBool(value)
+			mirrored, err := atob(value)
 			if err != nil {
 				return nil, err
 			}
 			part.Mirrored = mirrored
 
 		case "EXTENSION_U":
-			extensionU, err := strconv.ParseFloat(value, 64)
+			extensionU, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.ExtensionU = extensionU
 
 		case "EXTENSION_V":
-			extensionV, err := strconv.ParseFloat(value, 64)
+			extensionV, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.ExtensionV = extensionV
 
 		case "PLATE_SIDE":
-			part.PlateSide = value
+			part.PlateSide = string(value)
 
 		case "PART_COG_U":
-			x, err := parseOptFloat(value)
+			x, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			partCog.X = x
 
 		case "PART_COG_V":
-			y, err := parseOptFloat(value)
+			y, err := parseOptBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			partCog.Y = y
 
 		case "NO_INTERVALS_EXCESS_1":
-			n, err := strconv.Atoi(value)
+			n, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			part.NoIntervalsExcess1 = n
 
 		case "LENGTH_EXCESS_1":
-			length, err := strconv.ParseFloat(value, 64)
+			length, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.LengthExcess1 = length
 
 		case "NO_INTERVALS_EXCESS_2":
-			n, err := strconv.Atoi(value)
+			n, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			part.NoIntervalsExcess2 = n
 
 		case "LENGTH_EXCESS_2":
-			length, err := strconv.ParseFloat(value, 64)
+			length, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.LengthExcess2 = length
 
 		case "NO_INTERVALS_EXCESS_3":
-			n, err := strconv.Atoi(value)
+			n, err := atoi(value)
 			if err != nil {
 				return nil, err
 			}
 			part.NoIntervalsExcess3 = n
 
 		case "LENGTH_EXCESS_3":
-			length, err := strconv.ParseFloat(value, 64)
+			length, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			part.LengthExcess3 = length
 
 		case "CUST_DATA_1":
-			part.CustData1 = value
+			part.CustData1 = string(value)
 
 		case "CUST_DATA_2":
-			part.CustData2 = value
+			part.CustData2 = string(value)
 
 		case "CUST_DATA_3":
-			part.CustData3 = value
+			part.CustData3 = string(value)
 
 		case "CUST_DATA_4":
-			part.CustData4 = value
+			part.CustData4 = string(value)
 
 		case "CUST_TEXT_1":
-			part.CustText1 = value
+			part.CustText1 = string(value)
 
 		case "CUST_TEXT_2":
-			part.CustText2 = value
+			part.CustText2 = string(value)
 
 		case "CUST_TEXT_3":
-			part.CustText3 = value
+			part.CustText3 = string(value)
 
 		case "CUST_TEXT_4":
-			part.CustText4 = value
+			part.CustText4 = string(value)
 
 		case "CUST_TEXT_5":
-			part.CustText5 = value
+			part.CustText5 = string(value)
 
 		case "CUST_TEXT_6":
-			part.CustText6 = value
+			part.CustText6 = string(value)
 
 		case "CUST_TEXT_7":
-			part.CustText7 = value
+			part.CustText7 = string(value)
 
 		case "CUST_TEXT_8":
-			part.CustText8 = value
+			part.CustText8 = string(value)
 
 		case "CUST_TEXT_9":
-			part.CustText9 = value
+			part.CustText9 = string(value)
 
 		case "CUST_TEXT_10":
-			part.CustText10 = value
+			part.CustText10 = string(value)
 
 		case "WORKING_LOCATION":
-			part.WorkingLocation = value
+			part.WorkingLocation = string(value)
 
 		case "BUILDING_STRATEGY":
-			part.BuildingStrategy = value
+			part.BuildingStrategy = string(value)
 
 		case "PLANNING_UNIT":
-			part.PlanningUnit = value
+			part.PlanningUnit = string(value)
 
 		case "PANEL_NAME":
-			part.PanelName = value
+			part.PanelName = string(value)
 
 		case "CLIP_GRINDING_SIDE":
-			part.ClipGrindingSide = value
+			part.ClipGrindingSide = string(value)
 
 		case "COMMENT":
-			part.Comment = value
+			part.Comment = string(value)
 
 		case "DESTINATION":
-			part.Destination = value
+			part.Destination = string(value)
 
 		case "PART_ID":
-			v, err := parseOptInt(value)
+			v, err := parseOptIntBytes(value)
 			if err != nil {
 				return nil, err
 			}
 			part.PartID = v
 
 		case "FUNCTIONAL_DESCR_CODE":
-			part.FunctionalDescrCode = value
+			part.FunctionalDescrCode = string(value)
 
 		case "FUNCTIONAL_DESCR_TEXT":
-			part.FunctionalDescrText = value
+			part.FunctionalDescrText = string(value)
 
 		case "TYPE_OF_WORK":
-			part.TypeOfWork = value
+			part.TypeOfWork = string(value)
 
 		case "KNUCKLED":
-			part.Knuckled = value
+			part.Knuckled = string(value)
 
 		case "NESTED_ON":
-			part.NestedOn = value
+			part.NestedOn = string(value)
 
 		case "RAW_NAME":
-			part.RawName = value
+			part.RawName = string(value)
 		}
 	}
 
@@ -396,12 +395,11 @@ func readTransformationData(s *bufio.Scanner) (*TransformationData, error) {
 	t := &TransformationData{}
 
 	for s.Scan() {
-		text := s.Text()
-		if text == "END_OF_TRANSFORMATION_DATA" {
+		if bytes.Equal(s.Bytes(), endOfTransformationData) {
 			return t, nil
 		}
 
-		key, value, found := strings.Cut(text, "=")
+		key, value, found := nextKeyValue(s)
 		if !found {
 			return t, nil
 		}
@@ -410,19 +408,19 @@ func readTransformationData(s *bufio.Scanner) (*TransformationData, error) {
 
 		switch key {
 		case "TRANSFORMATION_TYPE":
-			t.Type = value
+			t.Type = string(value)
 		case "TRANSFORMATION_1":
-			t.Transformation1, err = parseOptFloat(value)
+			t.Transformation1, err = parseOptBytes(value)
 		case "TRANSFORMATION_2":
-			t.Transformation2, err = parseOptFloat(value)
+			t.Transformation2, err = parseOptBytes(value)
 		case "TRANSFORMATION_3":
-			t.Transformation3, err = parseOptFloat(value)
+			t.Transformation3, err = parseOptBytes(value)
 		case "TRANSFORMATION_4":
-			t.Transformation4, err = parseOptFloat(value)
+			t.Transformation4, err = parseOptBytes(value)
 		case "TRANSFORMATION_5":
-			t.Transformation5, err = parseOptFloat(value)
+			t.Transformation5, err = parseOptBytes(value)
 		case "TRANSFORMATION_6":
-			t.Transformation6, err = parseOptFloat(value)
+			t.Transformation6, err = parseOptBytes(value)
 		}
 
 		if err != nil {

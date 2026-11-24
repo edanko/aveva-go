@@ -2,6 +2,7 @@ package gen
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"strings"
 )
@@ -53,6 +54,14 @@ func ReadDocument(r io.Reader) (*Document, error) {
 
 	var lastPartIdx int
 
+	// partExists reports whether lastPartIdx names a part that has actually been
+	// read. Payload blocks and scopes can arrive before any PART_DATA, and
+	// lastPartIdx is then still its zero value, so the index alone is not enough:
+	// guarding on it alone indexed an empty slice and panicked.
+	partExists := func() bool {
+		return lastPartIdx >= 0 && lastPartIdx < len(parts)
+	}
+
 	for s.Scan() {
 		switch s.Text() {
 		case "PART_DATA":
@@ -75,17 +84,17 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			info := PartInformation{}
 
 			for s.Scan() {
-				if s.Text() == "END_OF_PART_INFORMATION" {
+				if bytes.Equal(s.Bytes(), endOfPartInformation) {
 					break
 				}
 
-				key, value, found := strings.Cut(s.Text(), "=")
+				key, value, found := nextKeyValue(s)
 				if !found {
 					continue
 				}
 
 				if key == "TYPE_OF_WORK" {
-					info.TypeOfWork = cleanStr(value)
+					info.TypeOfWork = cleanBytes(value)
 					continue
 				}
 
@@ -93,14 +102,14 @@ func ReadDocument(r io.Reader) (*Document, error) {
 				// reader maps both to the same key id.
 				switch key {
 				case "PART_NAME", "NAME":
-					if value == "" {
+					if len(value) == 0 {
 						// A scope with no owning part, e.g. a TYPE_OF_WORK=LABELLING
 						// run. Its payload is not part data; drop the association.
 						lastPartIdx = -1
 						continue
 					}
 
-					pl := placements[value]
+					pl := placements[string(value)]
 					switch {
 					case pl != nil && pl.used < len(pl.indices):
 						lastPartIdx = pl.indices[pl.used]
@@ -115,14 +124,14 @@ func ReadDocument(r io.Reader) (*Document, error) {
 						// declare it only here, so synthesize it rather than
 						// failing or dropping the payload.
 						parts = append(parts, &Part{
-							Name:      value,
+							Name:      string(value),
 							Thickness: generalData.Thickness,
 							Quality:   generalData.Quality,
 							PartCog:   &Point{},
 							Quantity:  1,
 						})
 						lastPartIdx = len(parts) - 1
-						placements[value] = &placementsOf{
+						placements[string(value)] = &placementsOf{
 							indices: []int{lastPartIdx},
 							used:    1,
 						}
@@ -130,7 +139,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 				}
 			}
 
-			if lastPartIdx >= 0 {
+			if partExists() {
 				info.PartName = parts[lastPartIdx].Name
 				parts[lastPartIdx].Information = append(parts[lastPartIdx].Information, info)
 			}
@@ -141,7 +150,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 				return nil, err
 			}
 
-			if lastPartIdx < 0 {
+			if !partExists() {
 				continue
 			}
 			parts[lastPartIdx].MarkingData = append(parts[lastPartIdx].MarkingData, md)
@@ -151,7 +160,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx < 0 {
+			if !partExists() {
 				continue
 			}
 			parts[lastPartIdx].GeometryData = append(parts[lastPartIdx].GeometryData, gd)
@@ -161,7 +170,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx < 0 {
+			if !partExists() {
 				continue
 			}
 			parts[lastPartIdx].StringData = append(parts[lastPartIdx].StringData, sd)
@@ -171,7 +180,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx < 0 {
+			if !partExists() {
 				continue
 			}
 			parts[lastPartIdx].BurningData = append(parts[lastPartIdx].BurningData, b)
@@ -181,7 +190,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].LabelTexts = append(parts[lastPartIdx].LabelTexts, lt)
 			} else {
 				doc.LabelTexts = append(doc.LabelTexts, lt)
@@ -192,7 +201,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].LabelSymbols = append(parts[lastPartIdx].LabelSymbols, ls)
 			} else {
 				doc.LabelSymbols = append(doc.LabelSymbols, ls)
@@ -203,7 +212,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].Edges = append(parts[lastPartIdx].Edges, e)
 			}
 
@@ -215,7 +224,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].RawSections = append(parts[lastPartIdx].RawSections, rs)
 			}
 
@@ -224,7 +233,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].Auxiliaries = append(parts[lastPartIdx].Auxiliaries, a)
 			}
 
@@ -233,7 +242,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].IdleData = append(parts[lastPartIdx].IdleData, idle)
 			}
 
@@ -242,7 +251,7 @@ func ReadDocument(r io.Reader) (*Document, error) {
 			if err != nil {
 				return nil, err
 			}
-			if lastPartIdx >= 0 {
+			if partExists() {
 				parts[lastPartIdx].BumpData = append(parts[lastPartIdx].BumpData, bump)
 			} else if len(parts) > 0 {
 				// BUMP_DATA describes the plate edge and can appear after the

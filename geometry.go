@@ -2,8 +2,6 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
 )
 
 type Geometry struct {
@@ -16,7 +14,7 @@ func readGeometry(s *bufio.Scanner) (Geometry, error) {
 	geometry := Geometry{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "START_OF_CONTOUR" {
 			contour, err := readContour(s)
@@ -33,10 +31,10 @@ func readGeometry(s *bufio.Scanner) (Geometry, error) {
 
 		switch key {
 		case "GEOMETRY_TYPE", "TYPE":
-			geometry.Type = value
+			geometry.Type = string(value)
 
 		case "ROLL_AXIS_NO":
-			rollAxisNo, err := strconv.Atoi(value)
+			rollAxisNo, err := atoi(value)
 			if err != nil {
 				return Geometry{}, err
 			}
