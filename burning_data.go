@@ -2,8 +2,6 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
 )
 
 type BurningData struct {
@@ -26,7 +24,7 @@ func readBurningData(s *bufio.Scanner) (BurningData, error) {
 	b := BurningData{}
 next:
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		switch key {
 		case "GEOMETRY_DATA":
@@ -60,46 +58,46 @@ next:
 
 		switch key {
 		case "SHAPE":
-			b.Shape = value
+			b.Shape = string(value)
 		case "START_END_IN_GAP":
-			b.StartEndInGap = value
+			b.StartEndInGap = string(value)
 		case "BEVEL_DEFINED":
-			b.BevelDefined = value
+			b.BevelDefined = string(value)
 		case "DIRECTION":
-			direction, err := strconv.Atoi(value)
+			direction, err := atoi(value)
 			if err != nil {
 				return BurningData{}, err
 			}
 			b.Direction = direction
 		case "DESIGNATION":
-			b.Designation = value
+			b.Designation = string(value)
 		case "PART_ID":
-			partID, err := strconv.Atoi(value)
+			partID, err := atoi(value)
 			if err != nil {
 				return BurningData{}, err
 			}
 			b.PartID = partID
 		case "NUMBER_OF_HEADS":
-			numberOfHeads, err := strconv.Atoi(value)
+			numberOfHeads, err := atoi(value)
 			if err != nil {
 				return BurningData{}, err
 			}
 			b.NumberOfHeads = numberOfHeads
 		case "GEOMETRY_VALID_FOR":
-			geometryValidFor, err := strconv.Atoi(value)
+			geometryValidFor, err := atoi(value)
 			if err != nil {
 				return BurningData{}, err
 			}
 			b.GeometryValidFor = geometryValidFor
 		case "DISTANCE_Y1_Y2":
-			distanceY1Y2, err := strconv.ParseFloat(value, 64)
+			distanceY1Y2, err := atof(value)
 			if err != nil {
 				return BurningData{}, err
 			}
 			b.DistanceY1Y2 = distanceY1Y2
 
 		case "HOLE_SHIPSIDE":
-			b.HoleShipside = value
+			b.HoleShipside = string(value)
 		}
 	}
 	return b, nil

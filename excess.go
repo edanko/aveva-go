@@ -2,8 +2,6 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
 )
 
 type Excess struct {
@@ -14,14 +12,14 @@ func readExcess(s *bufio.Scanner) (*Excess, error) {
 	excess := &Excess{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 		if !found {
 			break
 		}
 
 		switch key {
 		case "EXCESS_VALUE":
-			value, err := strconv.ParseFloat(value, 64)
+			value, err := atof(value)
 			if err != nil {
 				return nil, err
 			}

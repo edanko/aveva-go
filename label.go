@@ -2,7 +2,7 @@ package gen
 
 import (
 	"bufio"
-	"strings"
+	"bytes"
 )
 
 // PartInformation is one PART_INFORMATION scope. It names the part a following
@@ -34,7 +34,7 @@ func readLabelText(s *bufio.Scanner) (LabelText, error) {
 
 next:
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		switch key {
 		case "GEOMETRY_DATA":
@@ -57,23 +57,23 @@ next:
 
 		switch key {
 		case "TEXT_TYPE":
-			l.Type = cleanStr(value)
+			l.Type = cleanBytes(value)
 		case "TEXT_POSITION_U":
-			l.PositionU, err = parseOptFloat(value)
+			l.PositionU, err = parseOptBytes(value)
 		case "TEXT_POSITION_V":
-			l.PositionV, err = parseOptFloat(value)
+			l.PositionV, err = parseOptBytes(value)
 		case "TEXT_ANGLE":
-			l.Angle, err = parseOptFloat(value)
+			l.Angle, err = parseOptBytes(value)
 		case "TEXT_HEIGHT":
-			l.Height, err = parseOptFloat(value)
+			l.Height, err = parseOptBytes(value)
 		case "TEXT_DIRECTION":
-			l.Direction, err = parseOptInt(value)
+			l.Direction, err = parseOptIntBytes(value)
 		case "TEXT_SIDE":
-			l.Side = cleanStr(value)
+			l.Side = cleanBytes(value)
 		case "TEXT":
-			l.Text = value
+			l.Text = string(value)
 		case "TEXT_ELEMENTS":
-			l.Elements, err = parseOptInt(value)
+			l.Elements, err = parseOptIntBytes(value)
 		}
 
 		if err != nil {
@@ -100,7 +100,7 @@ func readLabelSymbol(s *bufio.Scanner) (LabelSymbol, error) {
 	sym := LabelSymbol{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "END_OF_LABELSYMBOL_DATA" {
 			return sym, nil
@@ -114,19 +114,19 @@ func readLabelSymbol(s *bufio.Scanner) (LabelSymbol, error) {
 
 		switch key {
 		case "SYMBOL_TYPE":
-			sym.Type = cleanStr(value)
+			sym.Type = cleanBytes(value)
 		case "SYMBOL_POSITION_U":
-			sym.PositionU, err = parseOptFloat(value)
+			sym.PositionU, err = parseOptBytes(value)
 		case "SYMBOL_POSITION_V":
-			sym.PositionV, err = parseOptFloat(value)
+			sym.PositionV, err = parseOptBytes(value)
 		case "SYMBOL_ANGLE":
-			sym.Angle, err = parseOptFloat(value)
+			sym.Angle, err = parseOptBytes(value)
 		case "SYMBOL_HEIGHT":
-			sym.Height, err = parseOptFloat(value)
+			sym.Height, err = parseOptBytes(value)
 		case "SYMBOL_FONT":
-			sym.Font, err = parseOptInt(value)
+			sym.Font, err = parseOptIntBytes(value)
 		case "SYMBOL_NUMBER":
-			sym.Number, err = parseOptInt(value)
+			sym.Number, err = parseOptIntBytes(value)
 		}
 
 		if err != nil {
@@ -150,7 +150,7 @@ func readAuxiliary(s *bufio.Scanner) (Auxiliary, error) { //nolint:unparam // un
 	a := Auxiliary{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "END_OF_AUXILIARY_DATA" {
 			return a, nil
@@ -162,9 +162,9 @@ func readAuxiliary(s *bufio.Scanner) (Auxiliary, error) { //nolint:unparam // un
 
 		switch key {
 		case "AUXILIARY_FUNCTION":
-			a.Function = cleanStr(value)
+			a.Function = cleanBytes(value)
 		case "AUXILIARY_PARAMETER":
-			a.Parameter = value
+			a.Parameter = string(value)
 		}
 	}
 
@@ -187,7 +187,7 @@ func readEdge(s *bufio.Scanner) (Edge, error) {
 	e := Edge{}
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		if key == "END_OF_EDGE_DATA" {
 			return e, nil
@@ -201,19 +201,19 @@ func readEdge(s *bufio.Scanner) (Edge, error) {
 
 		switch key {
 		case "NAME":
-			e.Name = value
+			e.Name = string(value)
 		case "START_U":
-			e.StartU, err = parseOptFloat(value)
+			e.StartU, err = parseOptBytes(value)
 		case "START_V":
-			e.StartV, err = parseOptFloat(value)
+			e.StartV, err = parseOptBytes(value)
 		case "END_U":
-			e.EndU, err = parseOptFloat(value)
+			e.EndU, err = parseOptBytes(value)
 		case "END_V":
-			e.EndV, err = parseOptFloat(value)
+			e.EndV, err = parseOptBytes(value)
 		case "ALENGTH":
-			e.ALength, err = parseOptFloat(value)
+			e.ALength, err = parseOptBytes(value)
 		case "MLENGTH":
-			e.MLength, err = parseOptFloat(value)
+			e.MLength, err = parseOptBytes(value)
 		}
 
 		if err != nil {
@@ -245,20 +245,20 @@ type RawSection struct {
 // interpreted; their markers are recorded as bare fields with an empty value.
 func readRawSection(s *bufio.Scanner, name string) (RawSection, error) {
 	rs := RawSection{Name: name}
-	terminator := "END_OF_" + name
+	terminator := []byte("END_OF_" + name)
 
 	for s.Scan() {
-		text := s.Text()
-		if text == terminator {
+		line := s.Bytes()
+		if bytes.Equal(line, terminator) {
 			return rs, nil
 		}
 
-		if key, value, found := strings.Cut(text, "="); found {
-			rs.Fields = append(rs.Fields, Field{Key: key, Value: value})
+		if key, value, found := bytes.Cut(line, eqSep); found {
+			rs.Fields = append(rs.Fields, Field{Key: string(key), Value: string(value)})
 			continue
 		}
 
-		rs.Fields = append(rs.Fields, Field{Key: strings.TrimSpace(text)})
+		rs.Fields = append(rs.Fields, Field{Key: string(bytes.TrimSpace(line))})
 	}
 
 	return rs, s.Err()

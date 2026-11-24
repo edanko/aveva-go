@@ -2,7 +2,7 @@ package gen
 
 import (
 	"bufio"
-	"strings"
+	"bytes"
 )
 
 // IdleData is an IDLE_DATA block: the rapid/traverse path the machine takes
@@ -28,21 +28,26 @@ func readIdleData(s *bufio.Scanner) (IdleData, error) {
 	idle := IdleData{}
 
 	for s.Scan() {
-		text := s.Text()
+		// Decide everything about the line before readContour can refill the
+		// scanner buffer that line aliases.
+		line := s.Bytes()
+		startOfContour := bytes.Equal(line, startOfContourMarker)
+		endOfIdleData := bytes.Equal(line, endOfIdleDataMarker)
+		hasField := bytes.Contains(line, eqSep)
 
-		switch text {
-		case "START_OF_CONTOUR":
+		switch {
+		case startOfContour:
 			contour, err := readContour(s)
 			if err != nil {
 				return IdleData{}, err
 			}
 			idle.Contour = contour
 
-		case "END_OF_IDLE_DATA":
+		case endOfIdleData:
 			return idle, nil
 		}
 
-		if _, _, found := strings.Cut(text, "="); !found && text != "START_OF_CONTOUR" {
+		if !hasField && !startOfContour {
 			return idle, s.Err()
 		}
 	}
@@ -73,27 +78,29 @@ func readBumpData(s *bufio.Scanner) (BumpData, error) {
 	bump := BumpData{}
 
 	for s.Scan() {
-		text := s.Text()
+		line := s.Bytes()
+		startOfContour := bytes.Equal(line, startOfContourMarker)
+		endOfBumpData := bytes.Equal(line, endOfBumpDataMarker)
+		key, value, found := bytes.Cut(line, eqSep)
 
-		switch text {
-		case "START_OF_CONTOUR":
+		switch {
+		case startOfContour:
 			contour, err := readContour(s)
 			if err != nil {
 				return BumpData{}, err
 			}
 			bump.Contour = contour
 
-		case "END_OF_BUMP_DATA":
+		case endOfBumpData:
 			return bump, nil
 		}
 
-		key, value, found := strings.Cut(text, "=")
 		if !found {
 			return bump, s.Err()
 		}
 
-		if key == "SHAPE" {
-			bump.Shape = value
+		if bytes.Equal(key, shapeKey) {
+			bump.Shape = string(value)
 		}
 	}
 

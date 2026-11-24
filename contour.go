@@ -3,8 +3,6 @@ package gen
 import (
 	"bufio"
 	"math"
-	"strconv"
-	"strings"
 )
 
 type Contour struct {
@@ -157,7 +155,7 @@ func readContour(s *bufio.Scanner) (*Contour, error) {
 
 next:
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 
 		switch key {
 		case "BEVEL_DATA":
@@ -191,77 +189,77 @@ next:
 
 		switch key {
 		case "START_U":
-			startX, err := strconv.ParseFloat(value, 64)
+			startX, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			start.X = startX
 
 		case "START_V":
-			startY, err := strconv.ParseFloat(value, 64)
+			startY, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			start.Y = startY
 
 		case "AMP_U":
-			ampU, err := strconv.ParseFloat(value, 64)
+			ampU, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			seg.AmpU = ampU
 
 		case "AMP_V":
-			ampV, err := strconv.ParseFloat(value, 64)
+			ampV, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			seg.AmpV = ampV
 
 		case "AMP":
-			amp, err := strconv.ParseFloat(value, 64)
+			amp, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			seg.Amp = amp
 
 		case "RADIUS":
-			radius, err := strconv.ParseFloat(value, 64)
+			radius, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			seg.Radius = radius
 
 		case "SWEEP":
-			sweep, err := strconv.ParseFloat(value, 64)
+			sweep, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			seg.Sweep = sweep
 
 		case "ORIGIN_U":
-			originX, err := strconv.ParseFloat(value, 64)
+			originX, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			origin.X = originX
 
 		case "ORIGIN_V":
-			originY, err := strconv.ParseFloat(value, 64)
+			originY, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			origin.Y = originY
 
 		case "U":
-			x, err := strconv.ParseFloat(value, 64)
+			x, err := atof(value)
 			if err != nil {
 				return nil, err
 			}
 			end.X = x
 
 		case "V":
-			y, err := strconv.ParseFloat(value, 64)
+			y, err := atof(value)
 			if err != nil {
 				return nil, err
 			}

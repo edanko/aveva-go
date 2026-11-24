@@ -2,8 +2,6 @@ package gen
 
 import (
 	"bufio"
-	"strconv"
-	"strings"
 )
 
 type StringData struct {
@@ -22,41 +20,41 @@ func readStringData(s *bufio.Scanner) (StringData, error) {
 	var err error
 
 	for s.Scan() {
-		key, value, found := strings.Cut(s.Text(), "=")
+		key, value, found := nextKeyValue(s)
 		if !found {
 			break
 		}
 
 		switch key {
 		case "STRING_TYPE":
-			stringData.Type = value
+			stringData.Type = string(value)
 
 		case "STRING_POSITION_U":
-			stringData.Pos.X, err = strconv.ParseFloat(value, 64)
+			stringData.Pos.X, err = atof(value)
 			if err != nil {
 				return StringData{}, err
 			}
 
 		case "STRING_POSITION_V":
-			stringData.Pos.Y, err = strconv.ParseFloat(value, 64)
+			stringData.Pos.Y, err = atof(value)
 			if err != nil {
 				return StringData{}, err
 			}
 
 		case "STRING_ANGLE":
-			stringData.Angle, err = strconv.ParseFloat(value, 64)
+			stringData.Angle, err = atof(value)
 			if err != nil {
 				return StringData{}, err
 			}
 
 		case "STRING_HEIGHT":
-			stringData.Height, err = strconv.ParseFloat(value, 64)
+			stringData.Height, err = atof(value)
 			if err != nil {
 				return StringData{}, err
 			}
 
 		case "STRING":
-			stringData.String = value
+			stringData.String = string(value)
 		}
 	}
 
